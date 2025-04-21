@@ -1,0 +1,22 @@
+[project]
+name = "address-book"
+version = "0.1.0"
+description = "Adress book RESTful api"
+authors = [
+    {name = "Inna Snegurova",email = "snegurova@gmail.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "asyncpg (>=0.30.0,<0.31.0)",
+    "greenlet (>=3.2.0,<4.0.0)",
+    "uvicorn (>=0.34.2,<0.35.0)",
+    "fastapi (>=0.115.12,<0.116.0)",
+    "email-validator (>=2.2.0,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
