@@ -1,11 +1,11 @@
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from functools import wraps
 
 from src.repository.contacts import ContactRepository
 from src.schemas import ContactCreate, ContactUpdate
 from src.database.models import User
-
 
 def _handle_integrity_error(e: IntegrityError):
     if "uq_user_email" in str(e.orig):
@@ -18,16 +18,27 @@ def _handle_integrity_error(e: IntegrityError):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The integrity error occurred.",
         )
+
+def handle_integrity_error(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        try:
+            return await func(*args, **kwargs)
+        except IntegrityError as e:
+            self_instance = args[0]
+            if hasattr(self_instance, 'contact_repository'):
+                repo = getattr(self_instance, 'contact_repository')
+                if hasattr(repo, 'db'):
+                    await repo.db.rollback()
+            _handle_integrity_error(e)
+    return wrapper
 class ContactService:
     def __init__(self, db: AsyncSession):
         self.contact_repository = ContactRepository(db)
 
+    @handle_integrity_error
     async def create_contact(self, body: ContactCreate, user: User):
-        try:
-            return await self.contact_repository.create_contact(body, user)
-        except IntegrityError as e:
-            await self.contact_repository.db.rollback()
-            _handle_integrity_error(e)
+        return await self.contact_repository.create_contact(body, user)
 
     async def get_contacts(
         self,
@@ -43,12 +54,9 @@ class ContactService:
     async def get_contact(self, contact_id: int, user: User):
         return await self.contact_repository.get_contact_by_id(contact_id, user)
 
+    @handle_integrity_error
     async def update_contact(self, contact_id: int, body: ContactUpdate, user: User):
-        try:
-            return await self.contact_repository.update_contact(contact_id, body, user)
-        except IntegrityError as e:
-            await self.contact_repository.db.rollback()
-            _handle_integrity_error(e)
+        return await self.contact_repository.update_contact(contact_id, body, user)
 
     async def remove_contact(self, contact_id: int, user: User):
         return await self.contact_repository.remove_contact(contact_id, user)
