@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Integer, func, String, UniqueConstraint
+from sqlalchemy import Boolean, ForeignKey, Integer, func, String, UniqueConstraint
 from sqlalchemy.orm import relationship, mapped_column, Mapped, DeclarativeBase
 from sqlalchemy.sql.sqltypes import DateTime, Date
 from datetime import datetime
@@ -33,3 +33,4 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
     avatar: Mapped[str] = mapped_column(String(255), nullable=True)
+    confirmed: Mapped[bool] = mapped_column(Boolean, default=False)

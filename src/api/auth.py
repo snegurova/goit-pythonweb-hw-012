@@ -1,15 +1,20 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Request
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
-from src.schemas import UserCreate, Token, User
-from src.services.auth import create_access_token, Hash
+from src.schemas import UserCreate, Token, User, RequestEmail
+from src.services.auth import create_access_token, Hash, get_email_from_token
 from src.services.users import UserService
+from src.services.email import send_email
 from src.database.db import get_db
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=User, status_code=status.HTTP_201_CREATED)
-async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
+async def register_user(
+    user_data: UserCreate, 
+    background_tasks: BackgroundTasks,
+    request: Request,
+    db: Session = Depends(get_db)):
     user_service = UserService(db)
 
     email_user = await user_service.get_user_by_email(user_data.email)
@@ -27,6 +32,9 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
         )
     user_data.password = Hash().get_password_hash(user_data.password)
     new_user = await user_service.create_user(user_data)
+    background_tasks.add_task(
+        send_email, new_user.email, new_user.username, request.base_url
+    )
 
     return new_user
 
@@ -42,6 +50,43 @@ async def login_user(
             detail="The username or password is incorrect",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    if not user.confirmed:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Email is not confirmed",
+        )
 
     access_token = await create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.get("/confirmed_email/{token}")
+async def confirmed_email(token: str, db: Session = Depends(get_db)):
+    email = await get_email_from_token(token)
+    user_service = UserService(db)
+    user = await user_service.get_user_by_email(email)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Verification error"
+        )
+    if user.confirmed:
+        return {"message": "Your email has been already confirmed"}
+    await user_service.confirmed_email(email)
+    return {"message": "Email confirmed successfully"}
+
+@router.post("/request_email")
+async def request_email(
+    body: RequestEmail,
+    background_tasks: BackgroundTasks,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    user_service = UserService(db)
+    user = await user_service.get_user_by_email(body.email)
+
+    if user.confirmed:
+        return {"message": "Your email has been already confirmed"}
+    if user:
+        background_tasks.add_task(
+            send_email, user.email, user.username, request.base_url
+        )
+    return {"message": "Check your email for confirmation link"}
