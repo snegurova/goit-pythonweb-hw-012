@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str = Field(..., env="JWT_SECRET")
     JWT_ALGORITHM: str = Field(..., env="JWT_ALGORITHM")
     JWT_EXPIRATION_SECONDS: int = Field(..., env="JWT_EXPIRATION_SECONDS")
+
     MAIL_USERNAME: EmailStr = Field(..., env="MAIL_USERNAME")
     MAIL_PASSWORD: str = Field(..., env="MAIL_PASSWORD")
     MAIL_FROM: EmailStr = Field(..., env="MAIL_FROM")
@@ -16,6 +17,10 @@ class Settings(BaseSettings):
     MAIL_SSL_TLS: bool = True
     USE_CREDENTIALS: bool = True
     VALIDATE_CERTS: bool = True
+
+    CLD_NAME: str = Field(..., env="CLD_NAME")
+    CLD_API_KEY: int = Field(..., env="CLD_API_KEY")
+    CLD_API_SECRET: str = Field(..., env="CLD_API_SECRET")
 
     class Config:
         env_file = ".env"
