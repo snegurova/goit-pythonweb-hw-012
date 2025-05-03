@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     CLD_API_KEY: int = Field(..., env="CLD_API_KEY")
     CLD_API_SECRET: str = Field(..., env="CLD_API_SECRET")
 
+    POSTGRES_DB: str
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
