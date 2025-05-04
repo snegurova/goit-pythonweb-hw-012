@@ -1,3 +1,9 @@
+"""
+FastAPI application for managing contacts and user authentication.
+
+This application provides endpoints for creating, updating, deleting, and retrieving contacts,
+as well as user authentication and rate limiting.
+"""
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
@@ -21,6 +27,16 @@ app.add_middleware(
 
 @app.exception_handler(RateLimitExceeded)
 async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    """
+    Custom exception handler for rate limit exceeded errors.
+
+    Args:
+        request (Request): The incoming request.
+        exc (RateLimitExceeded): The exception raised when the rate limit is exceeded.
+    
+    Returns:
+        JSONResponse: A JSON response indicating the rate limit has been exceeded.
+    """
     return JSONResponse(
         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         content={"error": "Limit exceeded, please try again later"},

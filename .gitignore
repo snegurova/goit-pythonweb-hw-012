@@ -1,7 +1,14 @@
 /venv
 __pycache__/
 *.py[cod]
+*.DS_Store
 .env
 .lh/
+
 # PostgreSQL volume
 postgres-data/
+
+# Sphinx build artifacts
+docs/_build/
+docs/.doctrees/
+docs/.pytest_cache/
