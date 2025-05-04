@@ -1,3 +1,8 @@
+"""
+SQLAlchemy models for the application's database tables.
+
+This module defines the ORM mappings for the User and Contact entities, using SQLAlchemy's DeclarativeBase system.
+"""
 from sqlalchemy import Boolean, ForeignKey, Integer, func, String, UniqueConstraint
 from sqlalchemy.orm import relationship, mapped_column, Mapped, DeclarativeBase
 from sqlalchemy.sql.sqltypes import DateTime, Date
@@ -7,6 +12,12 @@ class Base(DeclarativeBase):
     pass
 
 class Contact(Base):
+    """
+    ORM model for a contact record.
+
+    Represents a contact entry belonging to a user, with fields for name, email, phone number, birthday, and optional extra info.
+    Enforces a uniqueness constraint on the combination of user ID and email.
+    """
     __tablename__ = "contacts"
     __table_args__ = (
         UniqueConstraint("user_id", "email", name="uq_user_email"),
@@ -25,6 +36,12 @@ class Contact(Base):
     user = relationship("User", backref="contacts")
 
 class User(Base):
+    """
+    ORM model for a user account.
+
+    Represents an application user with a unique username and email address, hashed password,
+    avatar URL, account creation timestamp, and email confirmation status.
+    """
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)

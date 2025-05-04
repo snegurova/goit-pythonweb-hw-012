@@ -15,6 +15,18 @@ async def register_user(
     background_tasks: BackgroundTasks,
     request: Request,
     db: Session = Depends(get_db)):
+    """
+    Register a new user and send a confirmation email.
+
+    Args:
+        user_data (UserCreate): The data required to create a user.
+        background_tasks (BackgroundTasks): FastAPI background task manager to send email.
+        request (Request): The HTTP request object, used to extract base URL.
+        db (Session): The database session.
+
+    Returns:
+        User: The created user object.
+    """
     user_service = UserService(db)
 
     email_user = await user_service.get_user_by_email(user_data.email)
@@ -42,6 +54,16 @@ async def register_user(
 async def login_user(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
+    """
+    Authenticate a user and return a JWT access token.
+
+    Args:
+        form_data (OAuth2PasswordRequestForm): The login form containing username and password.
+        db (Session): The database session.
+
+    Returns:
+        dict: Access token and token type if authentication is successful.
+    """
     user_service = UserService(db)
     user = await user_service.get_user_by_username(form_data.username)
     if not user or not Hash().verify_password(form_data.password, user.hashed_password):
@@ -61,6 +83,16 @@ async def login_user(
 
 @router.get("/confirmed_email/{token}")
 async def confirmed_email(token: str, db: Session = Depends(get_db)):
+    """
+    Confirm user's email address using a verification token.
+
+    Args:
+        token (str): The email verification token.
+        db (Session): The database session.
+
+    Returns:
+        dict: A message indicating whether the confirmation was successful.
+    """
     email = await get_email_from_token(token)
     user_service = UserService(db)
     user = await user_service.get_user_by_email(email)
@@ -80,6 +112,18 @@ async def request_email(
     request: Request,
     db: Session = Depends(get_db),
 ):
+    """
+    Resend a confirmation email to the user.
+
+    Args:
+        body (RequestEmail): The request body containing the user's email.
+        background_tasks (BackgroundTasks): FastAPI background task manager to send email.
+        request (Request): The HTTP request object, used to extract base URL.
+        db (Session): The database session.
+
+    Returns:
+        dict: A message indicating the result of the request.
+    """
     user_service = UserService(db)
     user = await user_service.get_user_by_email(body.email)
 

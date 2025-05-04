@@ -1,3 +1,7 @@
+"""
+Utility routes for FastAPI service checks and diagnostics.
+This module includes a health check endpoint to verify database connectivity.
+"""
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
@@ -8,6 +12,21 @@ router = APIRouter(tags=["utils"])
 
 @router.get("/healthchecker")
 async def healthchecker(db: AsyncSession = Depends(get_db)):
+    """
+    Check the health status of the database connection.
+
+    Executes a simple SQL query to ensure the database is reachable.
+    If the database is not configured or not responding, an HTTP 500 error is raised.
+
+    Args:
+        db (AsyncSession): The asynchronous database session.
+
+    Returns:
+        dict: A welcome message indicating successful database connectivity.
+
+    Raises:
+        HTTPException: If the database check fails.
+    """
     try:
         result = await db.execute(text("SELECT 1"))
         result = result.scalar_one_or_none()

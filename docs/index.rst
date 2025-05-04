@@ -17,9 +17,106 @@ REST API main
   :undoc-members:
   :show-inheritance:
 
-REST API repository Contacts
-============================
+REST API schemas
+===================
+.. automodule:: src.schemas
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
+REST API routes
+================
+Authentication
+--------------
+.. automodule:: src.api.auth
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
+Contacts
+---------
+.. automodule:: src.api.contacts
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
+Users
+---------
+.. automodule:: src.api.users
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
+Utils
+---------
+.. automodule:: src.api.utils
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
+DATABASE
+================
+.. automodule:: src.database.db
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
+MODELS
+================
+.. automodule:: src.database.models
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
+REST API repositories
+========================
+Contacts
+---------
 .. automodule:: src.repository.contacts
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
+Users
+---------
+.. automodule:: src.repository.users
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
+REST API services
+========================
+Authentication
+---------------
+.. automodule:: src.services.auth
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
+Contacts
+---------
+.. automodule:: src.services.contacts
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
+Email
+---------
+.. automodule:: src.services.email
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
+File upload
+------------
+.. automodule:: src.services.upload_file
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
+Users
+---------
+.. automodule:: src.services.users
   :members:
   :undoc-members:
   :show-inheritance:
