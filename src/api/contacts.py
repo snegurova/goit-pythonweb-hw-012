@@ -136,7 +136,9 @@ async def create_contact(body: ContactCreate, db: AsyncSession = Depends(get_db)
         ContactResponse: The newly created contact.
     """
     contact_service = ContactService(db)
-    return await contact_service.create_contact(body, user)
+    contact = await contact_service.create_contact(body, user)
+    redis_client.flushdb()
+    return contact
 
 @router.put("/{contact_id}", response_model=ContactResponse)
 async def update_contact(
@@ -163,6 +165,7 @@ async def update_contact(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Contact is not found"
         )
+    redis_client.flushdb()
     return contact
 
 @router.delete("/{contact_id}", response_model=ContactResponse)
@@ -187,4 +190,5 @@ async def remove_note(contact_id: int, db: AsyncSession = Depends(get_db), user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Contact is not found"
         )
+    redis_client.flushdb()
     return contact
