@@ -117,6 +117,9 @@ async def test_get_upcoming_birthdays(contact_repository, mock_session, test_use
     result_proxy.scalars().all.return_value = [contact]
     mock_session.execute = AsyncMock(return_value=result_proxy)
 
+    mock_session.bind = MagicMock()
+    mock_session.bind.url.get_backend_name = MagicMock(return_value="postgresql")
+
     contacts = await contact_repository.get_upcoming_birthdays(0, 10, test_user)
 
     mock_session.execute.assert_called()

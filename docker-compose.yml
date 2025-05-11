@@ -16,9 +16,17 @@ services:
     build: .
     depends_on:
       - postgres
+      - redis
     environment:
       DB_URL: ${DB_URL}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     ports:
       - '8000:8000'
     volumes:
       - .:/app
+  redis:
+    image: redis:7
+    container_name: redis_cache
+    ports:
+      - '6379:6379'

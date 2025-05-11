@@ -1,5 +1,7 @@
+import json
 from typing import List
 
+from src.cache.redis_client import redis_client
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -36,8 +38,18 @@ async def read_contacts(
     Returns:
         List[ContactResponse]: A list of matching contact records.
     """
+    key = f"user:{user.id}:contacts:{skip}:{limit}:{first_name}:{last_name}:{email}"
+    cached = redis_client.get(key)
+    if cached:
+        print("Cache hit for contacts")
+        return json.loads(cached)
     contact_service = ContactService(db)
     contacts = await contact_service.get_contacts(skip, limit, first_name, last_name, email, user)
+    redis_client.set(
+        key,
+        json.dumps([ContactResponse.model_validate(c).model_dump() for c in contacts], default=str),
+        ex=60 * 60,
+    )
     return contacts
 
 @router.get("/upcoming-birthdays", response_model=List[ContactResponse])
@@ -46,7 +58,7 @@ async def get_birthdays(
     limit: int = 10,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
-    ):
+):
     """
     Retrieve contacts with upcoming birthdays.
 
@@ -59,8 +71,21 @@ async def get_birthdays(
     Returns:
         List[ContactResponse]: A list of upcoming birthday contacts.
     """
+    key = f"user:{user.id}:upcoming_birthdays:{skip}:{limit}"
+    cached = redis_client.get(key)
+
+    if cached:
+        return json.loads(cached)
+
     contact_service = ContactService(db)
-    return await contact_service.get_upcoming_birthdays(skip, limit, user)
+    birthdays = await contact_service.get_upcoming_birthdays(skip, limit, user)
+
+    redis_client.set(
+        key,
+        json.dumps([ContactResponse.model_validate(b).model_dump() for b in birthdays], default=str),
+        ex=60 * 60,
+    )
+    return birthdays
 
 @router.get("/{contact_id}", response_model=ContactResponse)
 async def read_contact(contact_id: int, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
@@ -78,12 +103,24 @@ async def read_contact(contact_id: int, db: AsyncSession = Depends(get_db), user
     Raises:
         HTTPException: If the contact is not found.
     """
+    key = f"user:{user.id}:contact:{contact_id}"
+    cached = redis_client.get(key)
+
+    if cached:
+        return json.loads(cached)
+
     contact_service = ContactService(db)
     contact = await contact_service.get_contact(contact_id, user)
     if contact is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Contact is not found"
         )
+
+    redis_client.set(
+    key,
+    json.dumps(ContactResponse.model_validate(contact).model_dump(), default=str),
+    ex=60 * 60,
+)
     return contact
 
 @router.post("/", response_model=ContactResponse, status_code=status.HTTP_201_CREATED)

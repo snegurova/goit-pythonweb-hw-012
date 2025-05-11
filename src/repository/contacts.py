@@ -11,6 +11,7 @@ from datetime import date, timedelta
 
 from sqlalchemy import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.engine import Engine
 
 from src.database.models import Contact, User
 from src.schemas import ContactCreate, ContactUpdate
@@ -155,7 +156,12 @@ class ContactRepository:
         today_str = today.strftime("%m-%d")
         next_week_str = next_week.strftime("%m-%d")
 
-        date_expr = func.strftime('%m-%d', Contact.birthday)
+        backend = str(self.db.bind.url.get_backend_name())
+        date_expr = (
+            func.to_char(Contact.birthday, 'MM-DD')
+            if 'postgresql' in backend
+            else func.strftime('%m-%d', Contact.birthday)
+        )
 
         stmt = (
             select(Contact)
