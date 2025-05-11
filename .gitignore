@@ -12,3 +12,8 @@ postgres-data/
 docs/_build/
 docs/.doctrees/
 docs/.pytest_cache/
+
+test.db
+coverage.xml
+.coverage
+htmlcov

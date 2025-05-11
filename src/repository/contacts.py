@@ -155,7 +155,7 @@ class ContactRepository:
         today_str = today.strftime("%m-%d")
         next_week_str = next_week.strftime("%m-%d")
 
-        date_expr = func.to_char(Contact.birthday, 'MM-DD')
+        date_expr = func.strftime('%m-%d', Contact.birthday)
 
         stmt = (
             select(Contact)

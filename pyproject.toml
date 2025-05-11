@@ -18,11 +18,14 @@ python-jose = { version = ">=3.4.0,<4.0.0", extras = ["cryptography"] }
 passlib = { version = ">=1.7.4,<2.0.0", extras = ["bcrypt"] }
 libgravatar = ">=1.0.4,<2.0.0"
 python-multipart = "^0.0.6"
-fastapi-mail = "^1.4.2"
-jinja2 = "^3.1.6"
 bcrypt = "<4.1"
 slowapi = "^0.1.9"
 cloudinary = "^1.44.0"
+fastapi-mail = "^1.4.2"
+jinja2 = "^3.1.6"
+aiosqlite = "^0.21.0"
+pytest-cov = "^6.1.1"
+
 
 
 [build-system]
@@ -32,4 +35,10 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.group.dev.dependencies]
 alembic = "^1.15.2"
 sphinx = "^8.2.3"
+pytest = "^8.3.5"
+pytest-asyncio = "^0.26.0"
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+filterwarnings = "ignore::DeprecationWarning"
+asyncio_default_fixture_loop_scope = "function"
