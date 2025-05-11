@@ -41,7 +41,6 @@ async def read_contacts(
     key = f"user:{user.id}:contacts:{skip}:{limit}:{first_name}:{last_name}:{email}"
     cached = redis_client.get(key)
     if cached:
-        print("Cache hit for contacts")
         return json.loads(cached)
     contact_service = ContactService(db)
     contacts = await contact_service.get_contacts(skip, limit, first_name, last_name, email, user)
